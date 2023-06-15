@@ -7,7 +7,7 @@ using Persistence;
 
 namespace Application
 {
-    public class CommandRequestHandler<T> : IRequestHandler<T> where T : IRequest
+    public class CommandRequestHandler<T, Tout> : IRequestHandler<T, Tout> where T : IRequest<Tout>
     {
         protected DataContext Context {get; private set;}
         public CommandRequestHandler(DataContext context)
@@ -15,7 +15,12 @@ namespace Application
             Context = context;        
         }
 
-        public virtual Task<Unit> Handle(T request, CancellationToken cancellationToken)
+        // public virtual Task<Unit> Handle(T request, CancellationToken cancellationToken)
+        // {
+        //     throw new NotImplementedException();
+        // }
+
+        public virtual Task<Tout> Handle(T request, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
