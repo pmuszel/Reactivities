@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Core;
+using Application.Interfaces;
 using Domain;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace Application.Activities
@@ -27,10 +29,26 @@ namespace Application.Activities
 
         public class Handler : CommandRequestHandler<Command, Result<Unit>>
         {
-            public Handler(DataContext context) : base(context) { }
+            private readonly IUserAccessor _userAccessor;
+
+            public Handler(DataContext context, IUserAccessor userAccessor) : base(context) 
+            {
+                _userAccessor = userAccessor;
+            }
 
             public async override Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
+                var user = await Context.Users.FirstOrDefaultAsync(x => x.UserName == _userAccessor.GetUserName());
+
+                var attendee = new ActivityAttendee
+                {
+                    AppUser = user,
+                    Activity = request.Activity,
+                    IsHost = true,
+                };
+
+                request.Activity.Attendees.Add(attendee);
+
                 Context.Activities.Add(request.Activity);
 
                 var result = await Context.SaveChangesAsync(cancellationToken) > 0;

@@ -15,11 +15,6 @@ namespace Application
             Context = context;        
         }
 
-        // public virtual Task<Unit> Handle(T request, CancellationToken cancellationToken)
-        // {
-        //     throw new NotImplementedException();
-        // }
-
         public virtual Task<Tout> Handle(T request, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
