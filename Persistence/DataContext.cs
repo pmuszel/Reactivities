@@ -1,6 +1,7 @@
 using Domain;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Persistence
 {
@@ -13,6 +14,7 @@ namespace Persistence
 
         public DbSet<Activity> Activities { get; set; }
         public DbSet<ActivityAttendee> ActivityAtendees { get; set; }
+        public DbSet<Photo> Photos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
