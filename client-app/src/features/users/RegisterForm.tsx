@@ -1,13 +1,13 @@
 import { ErrorMessage, Form, Formik } from "formik";
-import { values } from "mobx";
+
 import MyTextInput from "../../app/common/form/MyTextInput";
-import { Button, Header, Label } from "semantic-ui-react";
+import { Button, Header } from "semantic-ui-react";
 import { useStore } from "../../app/stores/store";
 import { observer } from "mobx-react-lite";
 
 import * as Yup from 'yup';
 import ValidationError from "../errors/ValidationError";
-import { error } from "console";
+
 
 export default observer (function RegisterForm() {
 
