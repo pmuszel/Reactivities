@@ -11,12 +11,12 @@ namespace Application.Activities
 {
     public class List
     {
-        public class Query : IRequest<Result<List<ActivityDto>>> 
+        public class Query : IRequest<Result<PagedList<ActivityDto>>> 
         {
-
+            public ActivityParams Params { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Result<List<ActivityDto>>>
+        public class Handler : IRequestHandler<Query, Result<PagedList<ActivityDto>>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -31,7 +31,7 @@ namespace Application.Activities
                 _userAccessor = userAccessor;
             }
 
-            public async Task<Result<List<ActivityDto>>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<PagedList<ActivityDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
                 // try
                 // {
@@ -47,15 +47,28 @@ namespace Application.Activities
                 //     _logger.LogInformation("Task was canceled!");
                 // }
 
-                var activities = await _context.Activities
+                var query = _context.Activities
+                    .Where(d => d.Date >= request.Params.StartDate)
+                    .OrderBy(d => d.Date)
                     .ProjectTo<ActivityDto>(_mapper.ConfigurationProvider, new { currentUsername = _userAccessor.GetUserName()})
                 // .Include(x => x.Attendees)
                 // .ThenInclude(x => x.AppUser)
-                    .ToListAsync(cancellationToken);
+                    .AsQueryable();
+
+                if(request.Params.IsGoing && !request.Params.IsHost)
+                {
+                    query = query.Where(x => x.Attendees.Any(a => a.Username == _userAccessor.GetUserName()));
+                }
+
+                if(request.Params.IsHost && !request.Params.IsGoing)
+                {
+                    query = query.Where(x => x.HostUsername == _userAccessor.GetUserName());
+                }
 
                 //var activitiesToReturn = _mapper.Map<List<ActivityDto>>(activities);
 
-                return Result<List<ActivityDto>>.Success(activities);
+                return Result<PagedList<ActivityDto>>.Success(
+                    await PagedList<ActivityDto>.CreateAsync(query, request.Params.PageNumber, request.Params.PageSize));
             }
         }
     }
